@@ -3,7 +3,8 @@ var formidable = require('formidable'),
     util = require('util'),
     fs = require('fs');
 
-var filename = './world-current.7z';
+var filename = './world-current.7z',
+    plaintext = { 'Content-Type': 'text/plain'};
 
 var timestamp = function () {
     return new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
@@ -36,7 +37,7 @@ http.createServer(function (req,res) {
                 + ' [INFO] finished upload from '
                 + req.connection.remoteAddress);
 
-            res.writeHead(200, {'content-type': 'text/plain'});
+            res.writeHead(200, plaintext);
             res.write('Upload complete.\n')
             res.end();
         });
@@ -45,10 +46,22 @@ http.createServer(function (req,res) {
 
         return;
     } else if (req.url == '/world') {
-        // TODO check exists
-        var fileStream = fs.createReadStream(filename);
+        fs.exists(filename, function(exists) {
+            if (!exists) {
+                res.writeHead(404, plaintext);
+                res.end('No world has been uploaded since server restart.');
+                return;
+            }
 
-        res.writeHead(200, {'content-type': 'application/x-7z-compressed'});
-        fileStream.pipe(res);
+            var fileStream = fs.createReadStream(filename);
+            res.writeHead(200, {'content-type': 'application/x-7z-compressed'});
+            fileStream.pipe(res);
+        });
+        return;
+    } else {
+        res.writeHead(404, plaintext);
+        res.end("404 Not found");
+        
+        return;
     }
 }).listen(process.env.PORT || 8000);
