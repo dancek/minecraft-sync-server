@@ -13,7 +13,7 @@ http.createServer(function (req,res) {
     var logMsg = [
         timestamp(),
         '[INFO]',
-        req.connection.remoteAddress,
+        req.header('x-forwarded-for') || req.connection.remoteAddress,
         req.method,
         req.url
     ].join(' ');
