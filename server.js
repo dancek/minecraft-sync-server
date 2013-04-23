@@ -51,4 +51,4 @@ http.createServer(function (req,res) {
         res.writeHead(200, {'content-type': 'application/x-7z-compressed'});
         fileStream.pipe(res);
     }
-}).listen(8000);
+}).listen(process.env.PORT || 8000);
